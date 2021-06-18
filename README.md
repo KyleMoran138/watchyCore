@@ -7,8 +7,8 @@
 This is the current development process. 
 
 1. Edit library code
-2. Copy the contents of the source folder into a folder called `watchyCore` in your Arduino library directory
-3. Compile the test watchface with the now modified library code 
+2. Every time you want to compile copy the contents of the source folder into a folder called `watchyCore` in your Arduino library directory
+3. Compile the test watchface (still need to make a test watchface) with the now modified library code 
 4. profit? 
 
 
