@@ -1,23 +1,18 @@
-# Watchy - Fully Open Source E-Paper Watch
+# watchyCore! A library for Watchy, a Fully Open Source E-Paper Watch
 
-![Watchy](https://watchy.sqfmi.com/img/watchy_render.png)
+*__This repo is just the library code for the watch. Watchfaces are managed seperately and will have a repo in the future.__* This is a fork of the original Watchy branch which is [here](https://github.com/sqfmi/Watchy)
 
-[**Pre-order Watchy!**](https://www.crowdsupply.com/sqfmi/watchy)
-Now with injection molded or CNC'd aluminum case
 
-Visit [**https://watchy.sqfmi.com**](https://watchy.sqfmi.com) for documentation, hardware design files, and more!
+## How to start contributing to this library
+This is the current development process. 
 
-## Setup
-1. In the Arduino IDE Boards Manager, install support for the ESP32. You can find instructions here: https://github.com/espressif/arduino-esp32/blob/master/docs/arduino-ide/boards_manager.md
-2. Install this library (search for **Watchy** in the library manager), and any other depdencies when prompted
-3. Check out the examples under ```Examples``` -> ```Watchy```
-4. Compile & Upload with these board settings:
-    * Board: "ESP32 Dev Module"
-    * Partition Scheme: "Minimal SPIFFS"
-    * All Other Settings: leave to default
+1. Edit library code
+2. Copy the contents of the source folder into a folder called `watchyCore` in your Arduino library directory
+3. Compile the test watchface with the now modified library code 
+4. profit? 
 
-You may also have to install the [CP2104 USB to Serial drivers](https://www.silabs.com/products/development-tools/software/usb-to-uart-bridge-vcp-drivers) if the port is not automatically detected
 
 ### Have Fun! :)
     
     
+![Watchy](https://watchy.sqfmi.com/img/watchy_render.png)
