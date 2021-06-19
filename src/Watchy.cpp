@@ -33,25 +33,6 @@ void Watchy::init(String datetime){
 
     switch (wakeup_reason)
     {
-        #ifdef ESP_RTC
-        case ESP_SLEEP_WAKEUP_TIMER: //ESP Internal RTC
-            if(guiState == WATCHFACE_STATE){
-                RTC.read(currentTime);
-                currentTime.Minute++;
-                tmElements_t tm;
-                tm.Month = currentTime.Month;
-                tm.Day = currentTime.Day;
-                tm.Year = currentTime.Year;
-                tm.Hour = currentTime.Hour;
-                tm.Minute = currentTime.Minute;
-                tm.Second = 0;
-                time_t t = makeTime(tm);
-                RTC.set(t);
-                RTC.read(currentTime);           
-                renderWatchFace(true); //partial updates on tick
-            }
-            break;        
-        #endif
         case ESP_SLEEP_WAKEUP_EXT0: //RTC Alarm
             RTC.alarm(ALARM_2); //resets the alarm flag in the RTC
             if(guiState == WATCHFACE_STATE){
@@ -63,9 +44,7 @@ void Watchy::init(String datetime){
             handleButtonPress();
             break;
         default: //reset
-            #ifndef ESP_RTC
             _rtcConfig(datetime);
-            #endif
             _bmaConfig();
             renderWatchFace(false); //full update on reset
             break;
@@ -74,12 +53,7 @@ void Watchy::init(String datetime){
 }
 
 void Watchy::deepSleep(){
-  #ifndef ESP_RTC
   esp_sleep_enable_ext0_wakeup(RTC_PIN, 0); //enable deep sleep wake on RTC interrupt
-  #endif  
-  #ifdef ESP_RTC
-  esp_sleep_enable_timer_wakeup(60000000);
-  #endif 
   esp_sleep_enable_ext1_wakeup(BTN_PIN_MASK, ESP_EXT1_WAKEUP_ANY_HIGH); //enable deep sleep wake on button press
   esp_deep_sleep_start();
 }
@@ -119,8 +93,6 @@ void Watchy::handleButtonPress(){
       renderWatchFace(false);
     }else if(guiState == APP_STATE){
       showMenu(menuIndex, false);//exit to menu if already in app
-    }else if(guiState == FW_UPDATE_STATE){
-      showMenu(menuIndex, false);//exit to menu if already in app
     }
   }
   //Up Button
@@ -152,53 +124,62 @@ void Watchy::handleButtonPress(){
   pinMode(UP_BTN_PIN, INPUT);
   pinMode(DOWN_BTN_PIN, INPUT);
   while(!timeout){
-      if(millis() - lastTimeout > 5000){
-          timeout = true;
-      }else{
-          if(digitalRead(MENU_BTN_PIN) == 1){
-            lastTimeout = millis();  
-            if(guiState == MAIN_MENU_STATE){//if already in menu, then select menu item
-                switch(menuIndex)
-                {
-                    case 0:
-                    setTime();
-                    break;                  
-                    default:
-                    break;                              
+    if(millis() - lastTimeout > 5000){
+        timeout = true;
+    }else{
+        switch (_getButtonPressed()){
+            case MENU_BTN_PIN:
+                lastTimeout = millis();  
+                if(guiState == MAIN_MENU_STATE){//if already in menu, then select menu item
+                    switch(menuIndex)
+                    {
+                        case 0:
+                        setTime();
+                        break;                  
+                        default:
+                        break;                              
+                    }
                 }
-            }
-          }else if(digitalRead(BACK_BTN_PIN) == 1){
-            lastTimeout = millis();
-            if(guiState == MAIN_MENU_STATE){//exit to watch face if already in menu
-            RTC.alarm(ALARM_2); //resets the alarm flag in the RTC
-            RTC.read(currentTime);
-            renderWatchFace(false);
-            break; //leave loop
-            }else if(guiState == APP_STATE){
-            showMenu(menuIndex, false);//exit to menu if already in app
-            }else if(guiState == FW_UPDATE_STATE){
-            showMenu(menuIndex, false);//exit to menu if already in app
-            }            
-          }else if(digitalRead(UP_BTN_PIN) == 1){
-            lastTimeout = millis();
-            if(guiState == MAIN_MENU_STATE){//increment menu index
-            menuIndex--;
-            if(menuIndex < 0){
-                menuIndex = MENU_LENGTH - 1;
-            }    
-            showMenu(menuIndex, true);
-            }            
-          }else if(digitalRead(DOWN_BTN_PIN) == 1){
-            lastTimeout = millis();
-            if(guiState == MAIN_MENU_STATE){//decrement menu index
-            menuIndex++;
-            if(menuIndex > MENU_LENGTH - 1){
-                menuIndex = 0;
-            }
-            showMenu(menuIndex, true);
-            }         
-          }
-      }
+                break;
+            
+            case BACK_BTN_PIN:
+                lastTimeout = millis();
+                if(guiState == MAIN_MENU_STATE){//exit to watch face if already in menu
+                    RTC.alarm(ALARM_2); //resets the alarm flag in the RTC
+                    RTC.read(currentTime);
+                    renderWatchFace(false);
+                    break;
+                }else if(guiState == APP_STATE){
+                    showMenu(menuIndex, false);//exit to menu if already in app
+                }  
+                break;
+
+            case UP_BTN_PIN:
+                lastTimeout = millis();
+                if(guiState == MAIN_MENU_STATE){//increment menu index
+                    menuIndex--;
+                    if(menuIndex < 0){
+                        menuIndex = MENU_LENGTH - 1;
+                    }    
+                    showMenu(menuIndex, true);
+                }  
+                break;
+
+            case DOWN_BTN_PIN:
+                lastTimeout = millis();
+                if(guiState == MAIN_MENU_STATE){//decrement menu index
+                    menuIndex++;
+                    if(menuIndex > MENU_LENGTH - 1){
+                        menuIndex = 0;
+                    }
+                    showMenu(menuIndex, true);
+                }
+                break;    
+
+            default:
+                break;
+        }
+    }
   }
   display.hibernate();    
 }
@@ -420,6 +401,17 @@ void Watchy::drawWatchFace(){
         display.print("0");
     }  
     display.println(currentTime.Minute);    
+}
+
+BTN_PIN_MASK Watchy::_getButtonPressed(){
+    const int* buttonPins = {MENU_BTN_MASK, BACK_BTN_MASK, UP_BTN_MASK, DOWN_BTN_MASK};
+    for(int buttonPinIndex = 0; buttonPinIndex < NUM_BUTTONS; buttonPinIndex = 0){
+        const BTN_PIN_MASK buttonPin = buttonPins[buttonPinIndex];
+        pinMode(buttonPin, INPUT);
+        if(digitalRead(buttonPin) == 1){
+            return buttonPin;
+        }
+    }
 }
 
 void Watchy::_rtcConfig(String datetime){

@@ -15,6 +15,7 @@
 #define BACK_BTN_PIN 25
 #define UP_BTN_PIN 32
 #define DOWN_BTN_PIN 4
+#define NUM_BUTTONS 4
 #define MENU_BTN_MASK GPIO_SEL_26
 #define BACK_BTN_MASK GPIO_SEL_25
 #define UP_BTN_MASK GPIO_SEL_32
