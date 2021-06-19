@@ -6,17 +6,31 @@
 ## How to start contributing to this library
 There's currently 2 ways to go about writing / testing code in this library
 
-### Option 1:
+### Branching strategy
+Here's a list of branches and what they're for
+- main (Where the 'stable' code lives)
+- release (Where the next releases code is merged, squash merged into main on deployment and re-created when release planning starts)
+- lastest (Where all feaures are merged, this is deleted and re-created after release __I think that's a rebase...__ )
+- <feature/patch>/<breifNameHere> (Where feture/patch development happens, squash merged into release??? Not sure bout this yet)
+
+When you start working on a bug/feature/patch, branch off of main (or whatever other branch you may have dependencies on.) and do your work. Once your code is worth of judgement (or lackthereof) open a pr for your branch into latest. Once that's merged it'll be available in the next latest build that occurs (needs automation see ISSUE#).
+    
+Just because a feature is in latest it does not mean the feature is going to be in the release branch / released. There's some release planning that might have to happen, not sure yet... release branch might get removed for latest, we'll see. 
+
+### PR process
+Once a PR is open it'll reqire review from at least one code owner. Once reviewed and approved, the code owner will squasg merge the PR.
+
+### Writing the code
+#### Option 1:
 1. Edit library code
 2. Every time you want to compile copy the contents of the source folder into a folder called `watchyCore` in your Arduino library directory
 3. Compile the test watchface (still need to make a test watchface) with the now modified library code 
 4. profit? 
 
-### Option 2 (untested so far):
+#### Option 2 (untested so far):
 1. Clone the repo into the Arduino library directory
 2. Edit library code
 3. Compile the test watchface (still need to make a test watchface) with the now modified library code 
-4. profit? 
 
 
 ### Have Fun! :)
