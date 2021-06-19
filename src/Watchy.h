@@ -13,36 +13,21 @@
 #include "bma.h"
 #include "config.h"    
 
-typedef struct weatherData{
-    int8_t temperature;
-    int16_t weatherConditionCode;
-}weatherData;
 
 class Watchy {
     public:
         static DS3232RTC RTC;
         static GxEPD2_BW<GxEPD2_154_D67, GxEPD2_154_D67::HEIGHT> display;
         tmElements_t currentTime;
+
     public:
         Watchy();
         void init(String datetime = "");
         void deepSleep();
-        float getBatteryVoltage();
         void vibMotor(uint8_t intervalMs = 100, uint8_t length = 20);
-
         void handleButtonPress();
         void showMenu(byte menuIndex, bool partialRefresh);
-        void showFastMenu(byte menuIndex);
-        void showBattery();
-        void showBuzz();
-        void showAccelerometer();
-        void showUpdateFW();
         void setTime();
-        void setupWifi();
-        bool connectWiFi();
-        weatherData getWeatherData();
-        void updateFWBegin();
-
         void renderWatchFace(bool partialRefresh);
         virtual void drawWatchFace(); //override this method for different watch faces
 
@@ -57,7 +42,5 @@ class Watchy {
 extern RTC_DATA_ATTR int guiState;
 extern RTC_DATA_ATTR int menuIndex;
 extern RTC_DATA_ATTR BMA423 sensor;
-extern RTC_DATA_ATTR bool WIFI_CONFIGURED;
-extern RTC_DATA_ATTR bool BLE_CONFIGURED;
 
 #endif

@@ -6,10 +6,6 @@ GxEPD2_BW<GxEPD2_154_D67, GxEPD2_154_D67::HEIGHT> Watchy::display(GxEPD2_154_D67
 RTC_DATA_ATTR int guiState;
 RTC_DATA_ATTR int menuIndex;
 RTC_DATA_ATTR BMA423 sensor;
-RTC_DATA_ATTR bool WIFI_CONFIGURED;
-RTC_DATA_ATTR bool BLE_CONFIGURED;
-RTC_DATA_ATTR weatherData currentWeather;
-RTC_DATA_ATTR int weatherIntervalCounter = WEATHER_UPDATE_INTERVAL;
 
 String getValue(String data, char separator, int index)
 {
@@ -88,6 +84,16 @@ void Watchy::deepSleep(){
   esp_deep_sleep_start();
 }
 
+void Watchy::vibMotor(uint8_t intervalMs, uint8_t length){
+    pinMode(VIB_MOTOR_PIN, OUTPUT);
+    bool motorOn = false;
+    for(int i=0; i<length; i++){
+        motorOn = !motorOn;
+        digitalWrite(VIB_MOTOR_PIN, motorOn);
+        delay(intervalMs);
+    }
+}
+
 void Watchy::handleButtonPress(){
   uint64_t wakeupBit = esp_sleep_get_ext1_wakeup_status();
   //Menu Button
@@ -98,20 +104,8 @@ void Watchy::handleButtonPress(){
       switch(menuIndex)
       {
         case 0:
-          showBattery();
-          break;
-        case 1:
-          showBuzz();
-          break;          
-        case 2:
-          showAccelerometer();
-          break;
-        case 3:
           setTime();
-          break;
-        case 4:
-          setupWifi();
-          break;                    
+          break;               
         default:
           break;                              
       }
@@ -167,20 +161,8 @@ void Watchy::handleButtonPress(){
                 switch(menuIndex)
                 {
                     case 0:
-                    showBattery();
-                    break;
-                    case 1:
-                    showBuzz();
-                    break;          
-                    case 2:
-                    showAccelerometer();
-                    break;
-                    case 3:
                     setTime();
-                    break;
-                    case 4:
-                    setupWifi();
-                    break;                    
+                    break;                  
                     default:
                     break;                              
                 }
@@ -235,7 +217,7 @@ void Watchy::showMenu(byte menuIndex, bool partialRefresh){
     uint16_t w, h;
     int16_t yPos;
 
-    const char *menuItems[] = {"Check Battery", "Vibrate Motor", "Show Accelerometer", "Set Time", "Setup WiFi", "Update Firmware"};
+    const char *menuItems[] = {"Set Time"};
     for(int i=0; i<MENU_LENGTH; i++){
     yPos = 30+(MENU_HEIGHT*i);
     display.setCursor(0, yPos);
@@ -253,16 +235,6 @@ void Watchy::showMenu(byte menuIndex, bool partialRefresh){
     display.display(partialRefresh);
 
     guiState = MAIN_MENU_STATE;    
-}
-
-void Watchy::vibMotor(uint8_t intervalMs, uint8_t length){
-    pinMode(VIB_MOTOR_PIN, OUTPUT);
-    bool motorOn = false;
-    for(int i=0; i<length; i++){
-        motorOn = !motorOn;
-        digitalWrite(VIB_MOTOR_PIN, motorOn);
-        delay(intervalMs);
-    }
 }
 
 void Watchy::setTime(){
@@ -450,7 +422,6 @@ void Watchy::drawWatchFace(){
     display.println(currentTime.Minute);    
 }
 
-
 void Watchy::_rtcConfig(String datetime){
     if(datetime != NULL){
         const time_t FUDGE(30);//fudge factor to allow for upload time, etc. (seconds, YMMV)
@@ -589,20 +560,4 @@ void Watchy::_bmaConfig(){
     sensor.enableTiltInterrupt();
     // It corresponds to isDoubleClick interrupt
     sensor.enableWakeupInterrupt();  
-}
-
-void Watchy::_configModeCallback (WiFiManager *myWiFiManager) {
-  display.init(0, false); //_initial_refresh to false to prevent full update on init
-  display.setFullWindow();
-  display.fillScreen(GxEPD_BLACK);
-  display.setFont(&FreeMonoBold9pt7b);
-  display.setTextColor(GxEPD_WHITE);
-  display.setCursor(0, 30);
-  display.println("Connect to");
-  display.print("SSID: ");
-  display.println(WIFI_AP_SSID);
-  display.print("IP: ");
-  display.println(WiFi.softAPIP());
-  display.display(false); //full refresh
-  display.hibernate();
 }
