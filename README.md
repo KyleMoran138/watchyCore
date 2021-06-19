@@ -18,7 +18,8 @@ When you start working on a bug/feature/patch, branch off of main (or whatever o
 Just because a feature is in latest it does not mean the feature is going to be in the release branch / released. There's some release planning that might have to happen, not sure yet... release branch might get removed for latest, we'll see. 
 
 ### PR process
-Once a PR is open it'll require review from at least one code owner. Once reviewed and approved, the code owner will squash merge the PR.
+- Once a PR is open it'll require review from at least one code owner. Once reviewed and approved, the code owner will squash merge the PR.
+- A PR can merge directly into main if it's documentation that does not coincide with any functionality. 
 
 ### Writing the code
 #### Option 1:
