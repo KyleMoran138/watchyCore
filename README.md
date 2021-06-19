@@ -4,10 +4,17 @@
 
 
 ## How to start contributing to this library
-This is the current development process. 
+There's currently 2 ways to go about writing / testing code in this library
 
+### Option 1:
 1. Edit library code
 2. Every time you want to compile copy the contents of the source folder into a folder called `watchyCore` in your Arduino library directory
+3. Compile the test watchface (still need to make a test watchface) with the now modified library code 
+4. profit? 
+
+### Option 2 (untested so far):
+1. Clone the repo into the Arduino library directory
+2. Edit library code
 3. Compile the test watchface (still need to make a test watchface) with the now modified library code 
 4. profit? 
 
