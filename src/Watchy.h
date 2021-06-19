@@ -10,7 +10,6 @@
 #include <Wire.h>
 #include <Fonts/FreeMonoBold9pt7b.h>
 #include "DSEG7_Classic_Bold_53.h"
-#include "BLE.h"
 #include "bma.h"
 #include "config.h"    
 
@@ -44,7 +43,7 @@ class Watchy {
         weatherData getWeatherData();
         void updateFWBegin();
 
-        void showWatchFace(bool partialRefresh);
+        void renderWatchFace(bool partialRefresh);
         virtual void drawWatchFace(); //override this method for different watch faces
 
     private:
