@@ -57,6 +57,8 @@ test-bin
 .idea
 .DS_Store
 .directory
+.pio/
+.vscode/
 hardware/arduino/avr/libraries/Bridge/examples/XivelyClient/passwords.h
 avr-toolchain-*.zip
 /app/nbproject/private/
