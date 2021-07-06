@@ -403,10 +403,10 @@ void Watchy::drawWatchFace(){
     display.println(currentTime.Minute);    
 }
 
-BTN_PIN_MASK Watchy::_getButtonPressed(){
-    const int* buttonPins = {MENU_BTN_MASK, BACK_BTN_MASK, UP_BTN_MASK, DOWN_BTN_MASK};
-    for(int buttonPinIndex = 0; buttonPinIndex < NUM_BUTTONS; buttonPinIndex = 0){
-        const BTN_PIN_MASK buttonPin = buttonPins[buttonPinIndex];
+int Watchy::_getButtonPressed(){
+    const unsigned long long int buttonPins[] = {MENU_BTN_MASK, BACK_BTN_MASK, UP_BTN_MASK, DOWN_BTN_MASK};
+    for(int buttonPinIndex = 0; buttonPinIndex < NUM_BUTTONS; buttonPinIndex++){
+        unsigned long long buttonPin = buttonPins[buttonPinIndex];
         pinMode(buttonPin, INPUT);
         if(digitalRead(buttonPin) == 1){
             return buttonPin;
