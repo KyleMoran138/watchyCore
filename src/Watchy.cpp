@@ -25,6 +25,21 @@ String getValue(String data, char separator, int index)
 }
 
 Watchy::Watchy(){} //constructor
+/*!
+    @brief log a message if serial output is enabled
+    @param message String: the message you'd like logged to serial
+    @param singleLine bool: false=Serial.println true=Serial.print
+*/
+static void _serialLog(String message, bool singleLine=false){
+    #ifdef OUTPUT
+    if(singleLine){
+        Serial.print(message);
+    }else{
+        Serial.println(message);
+    }
+    #endif
+}
+
 
 void Watchy::init(String datetime){
     Wire.begin(SDA, SCL); //init i2c
