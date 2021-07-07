@@ -7,7 +7,12 @@ RTC_DATA_ATTR int guiState;
 RTC_DATA_ATTR int menuIndex;
 RTC_DATA_ATTR BMA423 sensor;
 
-String getValue(String data, char separator, int index)
+/*!
+    @brief This is the pointer for what'll be rendered on screen
+*/
+void (*displayMethod)(GxEPD2_BW<GxEPD2_154_D67, GxEPD2_154_D67::HEIGHT> display);
+
+String getTimeValue(String data, char separator, int index)
 {
   int found = 0;
   int strIndex[] = {0, -1};
@@ -24,7 +29,6 @@ String getValue(String data, char separator, int index)
   return found>index ? data.substring(strIndex[0], strIndex[1]) : "";
 }
 
-Watchy::Watchy(){} //constructor
 /*!
     @brief log a message if serial output is enabled
     @param message String: the message you'd like logged to serial
@@ -40,15 +44,48 @@ static void _serialLog(String message, bool singleLine=false){
     #endif
 }
 
+/*!
+    @brief Render default watchface
+    @returns void
 
+    This is the default watchface that'll be set by default
+ */
+static void debugWatchface(GxEPD2_BW<GxEPD2_154_D67, GxEPD2_154_D67::HEIGHT> display){
+    _serialLog("FACE");
+    display.setFont(&FreeMonoBold9pt7b);
+    display.setCursor(0, DISPLAY_Y_HOME_PADDING + 9); // Set x cord to 0 and y cord to padding + font height
+    display.println("DEBUG TEST FACE");
+    display.println ("GUI STATE: " + String(guiState));
+    display.display(true);
+}
+
+/*!
+    @brief Constructor
+
+    Sets displayMethod to the default watchface for debugging
+*/
+Watchy::Watchy(){
+    #ifdef OUTPUT
+    Serial.begin(115200);
+    #endif
+    _serialLog("INIT");
+    displayMethod = &debugWatchface;
+}
+
+/*!
+    @brief Init method to be called in setup() of main code.
+    @param datetime(optional) string of time to configure rtc with.
+
+    Set i2c and get the wakeup status. Handle RTC_ALARM, WAKEUP_EXT1 or inital load of the watch 
+*/
 void Watchy::init(String datetime){
-    Wire.begin(SDA, SCL); //init i2c
+    Wire.begin(SDA, SCL);
     uint64_t wakeupBit = esp_sleep_get_ext1_wakeup_status();  
 
     switch (esp_sleep_get_wakeup_cause())
     {
         case ESP_SLEEP_WAKEUP_EXT0: //RTC Alarm
-            RTC.alarm(ALARM_2); //resets the alarm flag in the RTC
+            RTC.alarm(ALARM_2); //resets alarm 
             if(guiState == -1){
                 RTC.read(currentTime);
             }
@@ -60,37 +97,30 @@ void Watchy::init(String datetime){
             _bmaConfig();
             break;
     }
+    render();
 }
 
 /*!
-    This is the default watchface that'll be set by default
-    @brief Render default watchface
-    @returns void
- */
-void Watchy::drawWatchFace(){
-    display.setFont(&DSEG7_Classic_Bold_53);
-    display.setCursor(5, 53+60);
-    if(currentTime.Hour < 10){
-        display.print("0");
-    }
-    display.print(currentTime.Hour);
-    display.print(":");
-    if(currentTime.Minute < 10){
-        display.print("0");
-    }  
-    display.println(currentTime.Minute);    
+    @brief This renders the screen based on the current state
+*/
+void Watchy::render(){
+    _serialLog("RENDER");
+    display.init(0, false); //_initial_refresh to false to prevent full update on init
+    display.setFullWindow();
+    displayMethod(display);
+    display.hibernate();
 }
 
 void Watchy::_rtcConfig(String datetime){
     if(datetime != NULL){
         const time_t FUDGE(30); //fudge factor to allow for upload time, etc. (seconds, YMMV)
         tmElements_t tm;
-        tm.Year = getValue(datetime, ':', 0).toInt() - 1970;//offset from 1970, since year is stored in uint8_t        
-        tm.Month = getValue(datetime, ':', 1).toInt();
-        tm.Day = getValue(datetime, ':', 2).toInt();
-        tm.Hour = getValue(datetime, ':', 3).toInt();
-        tm.Minute = getValue(datetime, ':', 4).toInt();
-        tm.Second = getValue(datetime, ':', 5).toInt();
+        tm.Year = getTimeValue(datetime, ':', 0).toInt() - 1970;     
+        tm.Month = getTimeValue(datetime, ':', 1).toInt();
+        tm.Day = getTimeValue(datetime, ':', 2).toInt();
+        tm.Hour = getTimeValue(datetime, ':', 3).toInt();
+        tm.Minute = getTimeValue(datetime, ':', 4).toInt();
+        tm.Second = getTimeValue(datetime, ':', 5).toInt();
 
         time_t t = makeTime(tm) + FUDGE;
         RTC.set(t);

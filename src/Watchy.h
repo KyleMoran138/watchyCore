@@ -6,7 +6,6 @@
 #include <GxEPD2_BW.h>
 #include <Wire.h>
 #include <Fonts/FreeMonoBold9pt7b.h>
-#include "DSEG7_Classic_Bold_53.h"
 #include "bma.h"
 #include "config.h"    
 
@@ -20,7 +19,7 @@ class Watchy {
     public:
         Watchy();
         void init(String datetime = "");
-        virtual void drawWatchFace();
+        void render();
 
     private:
         void _rtcConfig(String datetime);    
