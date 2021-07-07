@@ -22,7 +22,11 @@
 #define DOWN_BTN_MASK GPIO_SEL_4
 #define ACC_INT_MASK GPIO_SEL_14
 #define BTN_PIN_MASK MENU_BTN_MASK|BACK_BTN_MASK|UP_BTN_MASK|DOWN_BTN_MASK
+
 //weather api
 #define TEMP_UNIT "metric" //use "imperial" for Fahrenheit"
+
+#define OUTPUT
+#define DISPLAY_Y_HOME_PADDING 2
 
 #endif
