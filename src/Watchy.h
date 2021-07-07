@@ -20,20 +20,13 @@ class Watchy {
     public:
         Watchy();
         void init(String datetime = "");
-        void deepSleep();
-        void vibMotor(uint8_t intervalMs = 100, uint8_t length = 20);
-        void handleButtonPress();
-        void showMenu(byte menuIndex, bool partialRefresh);
-        void setTime();
-        void renderWatchFace(bool partialRefresh);
-        virtual void drawWatchFace(); //override this method for different watch faces
+        virtual void drawWatchFace();
 
     private:
         void _rtcConfig(String datetime);    
         void _bmaConfig();
         static uint16_t _readRegister(uint8_t address, uint8_t reg, uint8_t *data, uint16_t len);
         static uint16_t _writeRegister(uint8_t address, uint8_t reg, uint8_t *data, uint16_t len);
-        int _getButtonPressed();
 };
 
 extern RTC_DATA_ATTR int guiState;
