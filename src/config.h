@@ -24,7 +24,5 @@
 #define BTN_PIN_MASK MENU_BTN_MASK|BACK_BTN_MASK|UP_BTN_MASK|DOWN_BTN_MASK
 //weather api
 #define TEMP_UNIT "metric" //use "imperial" for Fahrenheit"
-//menu
-#define WATCHFACE_STATE -1
 
 #endif

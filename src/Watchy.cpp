@@ -34,7 +34,7 @@ void Watchy::init(String datetime){
     {
         case ESP_SLEEP_WAKEUP_EXT0: //RTC Alarm
             RTC.alarm(ALARM_2); //resets the alarm flag in the RTC
-            if(guiState == WATCHFACE_STATE){
+            if(guiState == -1){
                 RTC.read(currentTime);
             }
             break;
