@@ -1,16 +1,14 @@
 #include "Watchy.h"
+#include "apps/App.h"
+#include "apps/DebugFace_App.h"
 
 DS3232RTC Watchy::RTC(false); 
 GxEPD2_BW<GxEPD2_154_D67, GxEPD2_154_D67::HEIGHT> Watchy::display(GxEPD2_154_D67(CS, DC, RESET, BUSY));
 
-RTC_DATA_ATTR int guiState;
-RTC_DATA_ATTR int menuIndex;
+RTC_DATA_ATTR int coreState;
 RTC_DATA_ATTR BMA423 sensor;
 
-/*!
-    @brief This is the pointer for what'll be rendered on screen
-*/
-void (*displayMethod)(GxEPD2_BW<GxEPD2_154_D67, GxEPD2_154_D67::HEIGHT> display);
+App* apps[] = {new DebugFace_App()};
 
 String getTimeValue(String data, char separator, int index)
 {
@@ -45,21 +43,6 @@ static void _serialLog(String message, bool singleLine=false){
 }
 
 /*!
-    @brief Render default watchface
-    @returns void
-
-    This is the default watchface that'll be set by default
- */
-static void debugWatchface(GxEPD2_BW<GxEPD2_154_D67, GxEPD2_154_D67::HEIGHT> display){
-    _serialLog("FACE");
-    display.setFont(&FreeMonoBold9pt7b);
-    display.setCursor(0, DISPLAY_Y_HOME_PADDING + 9); // Set x cord to 0 and y cord to padding + font height
-    display.println("DEBUG TEST FACE");
-    display.println ("GUI STATE: " + String(guiState));
-    display.display(true);
-}
-
-/*!
     @brief Constructor
 
     Sets displayMethod to the default watchface for debugging
@@ -69,7 +52,6 @@ Watchy::Watchy(){
     Serial.begin(115200);
     #endif
     _serialLog("INIT");
-    displayMethod = &debugWatchface;
 }
 
 /*!
@@ -86,7 +68,7 @@ void Watchy::init(String datetime){
     {
         case ESP_SLEEP_WAKEUP_EXT0: //RTC Alarm
             RTC.alarm(ALARM_2); //resets alarm 
-            if(guiState == -1){
+            if(coreState == -1){
                 RTC.read(currentTime);
             }
             break;
@@ -107,7 +89,7 @@ void Watchy::render(){
     _serialLog("RENDER");
     display.init(0, false); //_initial_refresh to false to prevent full update on init
     display.setFullWindow();
-    displayMethod(display);
+    apps[0]->displayMethod(display);
     display.hibernate();
 }
 

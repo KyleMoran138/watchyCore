@@ -5,10 +5,8 @@
 #include <DS3232RTC.h>
 #include <GxEPD2_BW.h>
 #include <Wire.h>
-#include <Fonts/FreeMonoBold9pt7b.h>
 #include "bma.h"
-#include "config.h"    
-
+#include "config.h"
 
 class Watchy {
     public:
@@ -29,7 +27,6 @@ class Watchy {
 };
 
 extern RTC_DATA_ATTR int guiState;
-extern RTC_DATA_ATTR int menuIndex;
 extern RTC_DATA_ATTR BMA423 sensor;
 
 #endif
