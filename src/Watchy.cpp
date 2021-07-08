@@ -63,6 +63,7 @@ Watchy::Watchy(){
 void Watchy::init(String datetime){
     Wire.begin(SDA, SCL);
     uint64_t wakeupBit = esp_sleep_get_ext1_wakeup_status();  
+    int wokenByPin = log(wakeupBit)/log(2);
 
     switch (esp_sleep_get_wakeup_cause())
     {
@@ -72,25 +73,39 @@ void Watchy::init(String datetime){
                 RTC.read(currentTime);
             }
             break;
-        case ESP_SLEEP_WAKEUP_EXT1: //button Press
-            break;
         default: //reset
             _rtcConfig(datetime);
             _bmaConfig();
             break;
     }
-    render();
+    render(wokenByPin);
+    goToSleep();
 }
 
 /*!
     @brief This renders the screen based on the current state
 */
-void Watchy::render(){
+void Watchy::render(int wakeupBit){
     _serialLog("RENDER");
+    if(wakeupBit < 0){
+        wakeupBit = -1;
+    }
     display.init(0, false); //_initial_refresh to false to prevent full update on init
     display.setFullWindow();
-    apps[0]->displayMethod(display);
+    App* currentApp = apps[0];
+    currentApp->displayMethod(display, wakeupBit, currentApp);
     display.hibernate();
+}
+
+/*!
+    @brief Put the esp32 to sleep
+
+    Puts the esp32 into deep sleep mode and set's it to re-awake on a button press. 
+    This'll need some updates to make sure the time doesn't fall behind on the screen
+*/
+void Watchy::goToSleep(){
+    esp_sleep_enable_ext1_wakeup(BTN_PIN_MASK, ESP_EXT1_WAKEUP_ANY_HIGH);
+    esp_deep_sleep_start();
 }
 
 void Watchy::_rtcConfig(String datetime){

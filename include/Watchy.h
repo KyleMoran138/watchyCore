@@ -17,7 +17,8 @@ class Watchy {
     public:
         Watchy();
         void init(String datetime = "");
-        void render();
+        void render(int wakeupBit);
+        void goToSleep();
 
     private:
         void _rtcConfig(String datetime);    
