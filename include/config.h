@@ -26,7 +26,6 @@
 //weather api
 #define TEMP_UNIT "metric" //use "imperial" for Fahrenheit"
 
-#define OUTPUT
 #define DISPLAY_Y_HOME_PADDING 2
 
 #endif

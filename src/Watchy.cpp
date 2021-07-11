@@ -1,14 +1,15 @@
 #include "Watchy.h"
 #include "apps/App.h"
 #include "apps/DebugFace_App.h"
+#include "apps/MainMenu_App.h"
 
-DS3232RTC Watchy::RTC(false); 
+DS3232RTC Watchy::RTC(false);
 GxEPD2_BW<GxEPD2_154_D67, GxEPD2_154_D67::HEIGHT> Watchy::display(GxEPD2_154_D67(CS, DC, RESET, BUSY));
 
 RTC_DATA_ATTR int coreState;
 RTC_DATA_ATTR BMA423 sensor;
 
-App* apps[] = {new DebugFace_App()};
+App* apps[] = {new DebugFace_App(), new MainMenu_App()};
 
 String getTimeValue(String data, char separator, int index)
 {
@@ -58,17 +59,17 @@ Watchy::Watchy(){
     @brief Init method to be called in setup() of main code.
     @param datetime(optional) string of time to configure rtc with.
 
-    Set i2c and get the wakeup status. Handle RTC_ALARM, WAKEUP_EXT1 or inital load of the watch 
+    Set i2c and get the wakeup status. Handle RTC_ALARM, WAKEUP_EXT1 or inital load of the watch
 */
 void Watchy::init(String datetime){
     Wire.begin(SDA, SCL);
-    uint64_t wakeupBit = esp_sleep_get_ext1_wakeup_status();  
+    uint64_t wakeupBit = esp_sleep_get_ext1_wakeup_status();
     int wokenByPin = log(wakeupBit)/log(2);
 
     switch (esp_sleep_get_wakeup_cause())
     {
         case ESP_SLEEP_WAKEUP_EXT0: //RTC Alarm
-            RTC.alarm(ALARM_2); //resets alarm 
+            RTC.alarm(ALARM_2); //resets alarm
             if(coreState == -1){
                 RTC.read(currentTime);
             }
@@ -92,15 +93,18 @@ void Watchy::render(int wakeupBit){
     }
     display.init(0, false); //_initial_refresh to false to prevent full update on init
     display.setFullWindow();
-    App* currentApp = apps[0];
-    currentApp->displayMethod(display, wakeupBit, currentApp);
+    App* currentApp = apps[1];
+    String renderResult = currentApp->displayMethod(display, wakeupBit);
+
+    // If there's a render result that means there's an app switch that needs to be processed and re-rendered
+
     display.hibernate();
 }
 
 /*!
     @brief Put the esp32 to sleep
 
-    Puts the esp32 into deep sleep mode and set's it to re-awake on a button press. 
+    Puts the esp32 into deep sleep mode and set's it to re-awake on a button press.
     This'll need some updates to make sure the time doesn't fall behind on the screen
 */
 void Watchy::goToSleep(){
@@ -112,7 +116,7 @@ void Watchy::_rtcConfig(String datetime){
     if(datetime != NULL){
         const time_t FUDGE(30); //fudge factor to allow for upload time, etc. (seconds, YMMV)
         tmElements_t tm;
-        tm.Year = getTimeValue(datetime, ':', 0).toInt() - 1970;     
+        tm.Year = getTimeValue(datetime, ':', 0).toInt() - 1970;
         tm.Month = getTimeValue(datetime, ':', 1).toInt();
         tm.Day = getTimeValue(datetime, ':', 2).toInt();
         tm.Hour = getTimeValue(datetime, ':', 3).toInt();
@@ -153,7 +157,7 @@ uint16_t Watchy::_writeRegister(uint8_t address, uint8_t reg, uint8_t *data, uin
 }
 
 void Watchy::_bmaConfig(){
- 
+
     if (sensor.begin(_readRegister, _writeRegister, delay) == false) {
         //fail to init BMA
         return;
@@ -245,5 +249,5 @@ void Watchy::_bmaConfig(){
     sensor.enableStepCountInterrupt();
     sensor.enableTiltInterrupt();
     // It corresponds to isDoubleClick interrupt
-    sensor.enableWakeupInterrupt();  
+    sensor.enableWakeupInterrupt();
 }
