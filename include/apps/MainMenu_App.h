@@ -13,7 +13,7 @@ class MainMenu_App: public App {
         virtual String displayMethod(GxEPD2_BW<GxEPD2_154_D67, GxEPD2_154_D67::HEIGHT> display, int wakeupBit);
 
     private:
-        int _currentSelection;
+        int _currentSelection = 0;
         App* _menuItems = {};
 
 };
